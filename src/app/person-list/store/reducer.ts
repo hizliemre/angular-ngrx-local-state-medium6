@@ -3,120 +3,42 @@ import { createReducer, on } from "@ngrx/store";
 import * as actions from "./actions";
 import { Person } from "./models";
 
-export const featureKey = "personListState";
-
-export interface AllPersonListsState {
-  lists: Record<string, PersonListState>;
-}
-
-export const allPersonListInitialState: AllPersonListsState = {
-  lists: {}
-};
+const featureKey = "personListState";
+export const sliceKey = (id: string) => `${featureKey}_${id}`;
 
 export interface PersonListState extends EntityState<Person> {
   loading: boolean;
 }
 
-export const allPersonListReducer = createReducer(allPersonListInitialState);
-
-export const entityAdapter: EntityAdapter<Person> = createEntityAdapter<Person>(
-  {
-    selectId: entity => entity.id
-  }
-);
+export const entityAdapter: EntityAdapter<Person> = createEntityAdapter<Person>({
+  selectId: entity => entity.id
+});
 
 export const initialState: PersonListState = entityAdapter.getInitialState({
   loading: false
 });
 
 export const reducer = createReducer(
-  allPersonListInitialState,
-  on(actions.initialize, (state, action) => ({
-    ...state,
-    lists: {
-      ...state.lists,
-      [action.identifier]: {
-        ...initialState
-      }
-    }
-  })),
-  on(actions.addPerson, actions.removePerson, (state, action) => ({
-    ...state,
-    lists: {
-      ...state.lists,
-      [action.identifier]: {
-        ...stateSlice(action, state),
-        loading: true
-      }
-    }
-  })),
-
+  initialState,
+  on(actions.initialize, () => ({ ...initialState })),
+  on(actions.addPerson, actions.removePerson, (state) => ({ ...state, loading: true })),
   on(actions.addPersonSuccess, (state, action) => ({
-    ...state,
-    lists: {
-      ...state.lists,
-      [action.identifier]: {
-        ...entityAdapter.addOne(action.response, stateSlice(action, state)),
-        loading: false
-      }
-    }
+    ...entityAdapter.addOne(action.response, state),
+    loading: false
   })),
-  on(actions.addPersonFail, actions.removePersonFail, (state, action) => ({
-    ...state,
-    lists: {
-      ...state.lists,
-      [action.identifier]: {
-        ...stateSlice(action, state),
-        loading: false
-      }
-    }
-  })),
+  on(actions.addPersonFail, actions.removePersonFail, (state) => ({ ...state, loading: false })),
   on(actions.removePersonSuccess, (state, action) => ({
-    ...state,
-    lists: {
-      ...state.lists,
-      [action.identifier]: {
-        ...entityAdapter.removeOne(
-          action.removedPersonId,
-          stateSlice(action, state)
-        ),
-        loading: false
-      }
-    }
+    ...entityAdapter.removeOne(action.removedPersonId, state),
+    loading: false
   })),
-  on(actions.removePersonFail, actions.removePersonFail, (state, action) => ({
-    ...state,
-    lists: {
-      ...state.lists,
-      [action.identifier]: {
-        ...stateSlice(action, state),
-        loading: false
-      }
-    }
-  })),
-  on(actions.destroy, (state, action) => ({
-    ...state,
-    lists: {
-      ...state.lists,
-      [action.identifier]: undefined
-    }
-  }))
+  on(actions.destroy, () => undefined)
 );
 
-const stateSlice = (
-  action: any,
-  state: AllPersonListsState
-): PersonListState => {
-  if (!Boolean(action.identifier)) throw Error("Action'da identifier yok.");
-  return state.lists[action.identifier];
-};
-
-export const loading = (state: AllPersonListsState, props: { identifier: string }) => state.lists[props.identifier].loading;
-
-export const selectAll = (state: AllPersonListsState, props: { identifier: string }) => {
-  if (Boolean(state.lists[props.identifier]))
+export const loading = (state: PersonListState) => state?.loading;
+export const selectAll = (state: PersonListState) => {
+  if (Boolean(state))
     return entityAdapter
       .getSelectors()
-      .selectAll(state.lists[props.identifier]);
+      .selectAll(state);
   return [];
 };
