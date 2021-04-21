@@ -1,5 +1,5 @@
 import { createEntityAdapter, EntityAdapter, EntityState } from "@ngrx/entity";
-import { createReducer, on } from "@ngrx/store";
+import { ActionReducer, createReducer, on, UPDATE } from "@ngrx/store";
 import * as actions from "./actions";
 import { Person } from "./models";
 
@@ -42,3 +42,10 @@ export const selectAll = (state: PersonListState) => {
       .selectAll(state);
   return [];
 };
+
+export const featureReducer = <T>(key: string, reducer: ActionReducer<T>) =>
+  (state: T, action: any) => {
+    if (action.type === UPDATE) return reducer(state, action);
+    if (Boolean(action.identifier) && action.identifier === key) return reducer(state, action);
+    return state;
+  };
