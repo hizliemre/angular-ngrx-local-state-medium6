@@ -28,15 +28,14 @@ export class PersonListComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    this._reducers.addReducer(fromReducer.sliceKey(this.id), fromReducer.featureReducer(this.id, fromReducer.reducer))
+    this._reducers.addReducer(
+      fromReducer.sliceKey(this.id),
+      fromReducer.featureReducer(this.id, fromReducer.reducer)
+    );
     this._effects.addEffects(new PersonListEffects(this._actions$, this._service, this.id));
     this._store$.dispatch(actions.initialize({ identifier: this.id }));
-    this.persons$ = this._store$.select(fromStore.selectAll(this.id), {
-      identifier: this.id
-    });
-    this.loading$ = this._store$.select(fromStore.selectLoading(this.id), {
-      identifier: this.id
-    });
+    this.persons$ = this._store$.select(fromStore.selectAll(this.id));
+    this.loading$ = this._store$.select(fromStore.selectLoading(this.id));
   }
 
   ngOnDestroy(): void {
