@@ -1,0 +1,28 @@
+<div class="persons">
+
+  <ng-container *ngIf="persons$ | async as persons">
+    <div class="person"
+         *ngFor="let person of persons">
+      <span>{{person.id}} - {{person.name}} {{person.lastname}}</span>
+      <button (click)="remove(person)">Remove</button>
+    </div>
+  </ng-container>
+
+</div>
+
+<div class="form-container">
+  <div class="form-element">
+    <label [for]="name">Name</label>
+    <input #name>
+  </div>
+  <div class="form-element">
+    <label [for]="lastname">Lastname</label>
+    <input #lastname>
+  </div>
+  <button (click)="save(name.value, lastname.value)">Save</button>
+</div>
+
+<div class="loading"
+     *ngIf="loading$ | async">
+  loading...
+</div>
