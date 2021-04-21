@@ -1,11 +1,9 @@
-import { Injectable } from '@angular/core';
-import { Actions, createEffect,EffectNotification,ofType, OnRunEffects } from '@ngrx/effects';
+import { Actions, createEffect, EffectNotification, ofType, OnRunEffects } from '@ngrx/effects';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap, takeUntil, tap } from 'rxjs/operators';
 import * as actions from './actions';
 import { PersonListService } from './service';
 
-@Injectable()
 export class PersonListEffects implements OnRunEffects {
 
   constructor(
